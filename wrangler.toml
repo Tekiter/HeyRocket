@@ -1,3 +1,7 @@
 name = "hey-workers"
 main = "src/index.ts"
 compatibility_date = "2023-01-16"
+
+kv_namespaces = [
+    { binding = "data", id = "102b41f5dd2a46bfb2e6dbf57215a66c", preview_id = "16440a2b60e247469a60979e38eb043e" }
+]
