@@ -10,7 +10,6 @@ export function createSlackWebClient({ botToken }: SlackWebClientOptions) {
       key: K,
       payload: Parameters<WebAPITypes[K]>[0]
     ): Promise<ReturnType<WebAPITypes[K]>> {
-      console.log("REQUESTING", key, payload, botToken);
       const res = await fetch(`https://slack.com/api/${key}`, {
         method: "POST",
         headers: {

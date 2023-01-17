@@ -23,10 +23,8 @@ export function createSlackEventHandler() {
       }
 
       if (isEventCallback(data)) {
-        console.log("GOT CALLBACK", data);
         const handler = fnMap.get(data.event.type);
         if (handler) {
-          console.log("HANDLER EXISTS");
           await handler(data.event as never);
         }
       }
