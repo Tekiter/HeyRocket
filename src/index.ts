@@ -8,7 +8,6 @@ import { createSlackWebClient } from "./slack/webapi";
 import { createD1Store } from "./store/d1/d1Store";
 
 export interface Env {
-  data: KVNamespace;
   BOT_TOKEN: string;
   DB: D1Database;
 }
