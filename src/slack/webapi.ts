@@ -19,7 +19,11 @@ export function createSlackWebClient({ botToken }: SlackWebClientOptions) {
         body: JSON.stringify(payload),
       });
 
-      return (await res.json()) as never;
+      const data = await res.json();
+      if (!(data as { ok: boolean })?.ok) {
+        console.error(data);
+      }
+      return data as never;
     },
   };
 }

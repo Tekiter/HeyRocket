@@ -36,7 +36,7 @@ export function createApp({ botToken, d1db }: AppDeps) {
 
     handler.onEvent("message", async (payload) => {
       if (payload.subtype === undefined) {
-        const { text, bot_id, channel, user, ts } = payload;
+        const { text, bot_id, channel, user, thread_ts } = payload;
 
         if (!!bot_id || !text) {
           return;
@@ -61,7 +61,7 @@ export function createApp({ botToken, d1db }: AppDeps) {
                 )} 에게 ${EMOJI} ${count}개를 더 보낼 수 없어요! 오늘은 ${fromTodayRemaining}개만 더 보낼 수 있어요.`,
               user,
               channel,
-              thread_ts: ts,
+              thread_ts,
             });
             continue;
           }
@@ -74,7 +74,7 @@ export function createApp({ botToken, d1db }: AppDeps) {
               )} 에게 ${EMOJI}을 ${count}개 보냈어요! 오늘 ${fromTodayRemaining}개를 더 보낼 수 있어요.`,
             user,
             channel,
-            thread_ts: ts,
+            thread_ts,
           });
 
           await client.request("chat.postMessage", {
