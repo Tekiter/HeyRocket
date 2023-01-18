@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS `total`;
+DROP TABLE IF EXISTS `received_total`;
 CREATE TABLE `total` (
     `user_id` TEXT NOT NULL,
     `amount` INTEGER NOT NULL,

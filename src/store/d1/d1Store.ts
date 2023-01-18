@@ -13,7 +13,7 @@ export function createD1Store(
   return {
     async getTodayUsed(userId) {
       const user = await db
-        .selectFrom("today")
+        .selectFrom("sent_today")
         .where("user_id", "=", userId)
         .select(["amount", "expire"])
         .executeTakeFirst();
@@ -22,7 +22,10 @@ export function createD1Store(
         return 0;
       }
       if (dateToInt(new Date()) > user.expire) {
-        await db.deleteFrom("today").where("user_id", "=", userId).execute();
+        await db
+          .deleteFrom("sent_today")
+          .where("user_id", "=", userId)
+          .execute();
         return 0;
       }
 
@@ -32,7 +35,7 @@ export function createD1Store(
       const expire = dateToInt(getEndOfToday());
 
       await db
-        .insertInto("today")
+        .insertInto("sent_today")
         .values({
           user_id: userId,
           amount,
@@ -48,7 +51,7 @@ export function createD1Store(
     },
     async getTotal(userId) {
       const user = await db
-        .selectFrom("total")
+        .selectFrom("received_total")
         .where("user_id", "=", userId)
         .select(["amount"])
         .executeTakeFirst();
@@ -61,7 +64,7 @@ export function createD1Store(
     },
     async setTotal(userId, amount) {
       await db
-        .insertInto("total")
+        .insertInto("received_total")
         .values({
           user_id: userId,
           amount,
@@ -78,11 +81,11 @@ export function createD1Store(
 }
 
 interface Database {
-  total: {
+  received_total: {
     user_id: string;
     amount: number;
   };
-  today: {
+  sent_today: {
     user_id: string;
     amount: number;
     expire: number;
