@@ -1,13 +1,16 @@
+import { endOfDay } from "date-fns";
+import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { Hono } from "hono";
 import { createAmountManager } from "./amountManager";
 import { extract } from "./extractMessage";
 import { createSlackEventHandler } from "./slack/event";
 import { createSlackWebClient } from "./slack/webapi";
-import { createKVStore } from "./store/kv/kvStore";
+import { createD1Store } from "./store/d1/d1Store";
 
 export interface Env {
   data: KVNamespace;
   BOT_TOKEN: string;
+  DB: D1Database;
 }
 
 const TODAY_QUOTA = 5;
@@ -18,9 +21,14 @@ const app = new Hono<{ Bindings: Env }>();
 app.post("/event", async (c) => {
   const data = await c.req.json();
 
+  const getEndOfToday = () => {
+    const zone = "Asia/Seoul";
+    return zonedTimeToUtc(endOfDay(utcToZonedTime(new Date(), zone)), zone);
+  };
+
   const handler = createSlackEventHandler();
   const client = createSlackWebClient({ botToken: c.env.BOT_TOKEN });
-  const store = createKVStore(c.env.data);
+  const store = createD1Store(c.env.DB, getEndOfToday);
   const amountManager = createAmountManager({ store, maxAmount: TODAY_QUOTA });
 
   handler.onEvent("message", async (payload) => {
@@ -47,7 +55,7 @@ app.post("/event", async (c) => {
               .map((user) => `<@${user}>`)
               .join(
                 ", "
-              )} 에게 ${EMOJI} ${count}개를 더 보낼 수 없어요! (오늘의 남은 개수: ${fromTodayRemaining})`,
+              )} 에게 ${EMOJI} ${count}개를 더 보낼 수 없어요! 오늘은 ${fromTodayRemaining}개만 더 보낼 수 있어요.`,
             user,
             channel,
             thread_ts: ts,
@@ -60,7 +68,7 @@ app.post("/event", async (c) => {
             .map((user) => `<@${user}>`)
             .join(
               ", "
-            )} 에게 ${EMOJI}을 ${count}개 보냈어요! (오늘의 남은 개수: ${fromTodayRemaining})`,
+            )} 에게 ${EMOJI}을 ${count}개 보냈어요! 오늘 ${fromTodayRemaining}개를 더 보낼 수 있어요.`,
           user,
           channel,
           thread_ts: ts,

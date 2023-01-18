@@ -4,6 +4,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
     "@slack/bolt": "^3.12.2",
+    "better-sqlite3": "7.6.2",
     "typescript": "^4.9.4",
     "vitest": "^0.27.1",
     "wrangler": "2.7.1"
@@ -12,9 +13,14 @@
   "scripts": {
     "start": "wrangler dev",
     "deploy": "wrangler publish",
+    "log": "wrangler tail",
     "test": "vitest"
   },
   "dependencies": {
-    "hono": "^2.7.2"
+    "date-fns": "^2.29.3",
+    "date-fns-tz": "^1.3.7",
+    "hono": "^2.7.2",
+    "kysely": "^0.23.4",
+    "kysely-d1": "^0.1.0"
   }
 }
