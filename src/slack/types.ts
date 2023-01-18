@@ -10,6 +10,7 @@ import type { Methods } from "@slack/web-api/dist/methods";
 export interface WebAPITypes {
   "chat.postMessage": Methods["chat"]["postMessage"];
   "chat.postEphemeral": Methods["chat"]["postEphemeral"];
+  "views.publish": Methods["views"]["publish"];
 }
 
 export interface EventBase {

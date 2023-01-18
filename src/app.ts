@@ -1,11 +1,8 @@
-import endOfDay from "date-fns/endOfDay";
-import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { Hono } from "hono";
 import { createAmountManager } from "./amountManager";
 import { extractTarget } from "./extractTarget";
 import { createSlackEventHandler } from "./slack/event";
 import { createSlackWebClient } from "./slack/webapi";
-import { createD1Store } from "./store/d1/d1Store";
 import {
   canNotSendMoreMessage,
   receivedMessage,
@@ -35,6 +32,48 @@ export function createApp({ botToken, store, emoji, todayQuota }: AppDeps) {
   app.post("/event", async (c) => {
     const data = await c.req.json();
 
+    handler.onEvent("app_home_opened", async (payload) => {
+      const { user, tab } = payload;
+
+      const { topReceived } = await amountManager.getRanking();
+
+      if (tab === "home") {
+        await client.request("views.publish", {
+          user_id: user,
+          view: {
+            type: "home",
+            blocks: [
+              {
+                type: "divider",
+              },
+              {
+                type: "header",
+                text: {
+                  type: "plain_text",
+                  text: "전체 기간 랭킹",
+                },
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: topReceived
+                    .map(
+                      ({ user, amount }, idx) =>
+                        `${idx + 1}. ${emoji}x${amount}\t\t<@${user}>`
+                    )
+                    .join("\n"),
+                },
+              },
+              {
+                type: "divider",
+              },
+            ],
+          },
+        });
+      }
+    });
+
     handler.onEvent("message", async (payload) => {
       if (payload.subtype === undefined) {
         const { text, bot_id, channel, user, thread_ts } = payload;
@@ -42,14 +81,12 @@ export function createApp({ botToken, store, emoji, todayQuota }: AppDeps) {
         if (!!bot_id || !text) {
           return;
         }
-
         const { success, mentions, count } = extractTarget(text, emoji);
         if (!success) {
           return;
         }
 
         const targets = uniq(mentions);
-
         for (const target of targets) {
           if (user === target) {
             continue;

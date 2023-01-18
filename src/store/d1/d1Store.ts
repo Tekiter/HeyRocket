@@ -76,6 +76,19 @@ export function createD1Store(
         )
         .execute();
     },
+    async getReceivedRanking(limit) {
+      const records = await db
+        .selectFrom("received_total")
+        .orderBy("amount", "desc")
+        .limit(limit)
+        .select(["user_id", "amount"])
+        .execute();
+
+      return records.map((record) => ({
+        user: record.user_id,
+        amount: record.amount,
+      }));
+    },
     async commit() {},
   };
 }

@@ -40,5 +40,10 @@ export function createAmountManager({
         fromTodayRemaining: maxAmount - newFromTodayUsed,
       };
     },
+    async getRanking() {
+      const topReceived = await store.getReceivedRanking(10);
+
+      return { topReceived };
+    },
   };
 }
