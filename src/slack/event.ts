@@ -1,5 +1,10 @@
-import { KnownEventFromType, SlackEvent } from "@slack/bolt/dist/types/events";
-import { EnvelopedEvent, EventBase, HandshakeEvent } from "./types";
+import {
+  EnvelopedEvent,
+  EventBase,
+  HandshakeEvent,
+  KnownEventFromType,
+  SlackEvent,
+} from "./types";
 
 export function createSlackEventHandler() {
   const fnMap = new Map<string, (data: SlackEvent) => Promise<void> | void>();

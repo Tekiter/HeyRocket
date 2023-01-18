@@ -18,17 +18,14 @@ export function createD1Store(
         .select(["amount", "expire"])
         .executeTakeFirst();
 
-      console.log(user);
       if (!user) {
         return 0;
       }
       if (dateToInt(new Date()) > user.expire) {
-        console.log("EXPIRE?", dateToInt(new Date()), user.expire);
         await db.deleteFrom("today").where("user_id", "=", userId).execute();
         return 0;
       }
 
-      console.log("RETURNING", user.amount);
       return user.amount;
     },
     async setTodayUsed(userId, amount) {

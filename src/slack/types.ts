@@ -1,7 +1,10 @@
 export type {
   MessageEvent,
   EnvelopedEvent,
+  KnownEventFromType,
+  SlackEvent,
 } from "@slack/bolt/dist/types/events";
+
 import type { Methods } from "@slack/web-api/dist/methods";
 
 export interface WebAPITypes {

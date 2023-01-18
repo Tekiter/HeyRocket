@@ -17,7 +17,7 @@ export function createAmountManager({
       const fromAmount = await store.getTotal(from);
       const toAmount = await store.getTotal(to);
       const fromTodayUsed = await store.getTodayUsed(from);
-      console.log("GOT:", fromTodayUsed);
+
       const newToAmount = toAmount + amount;
       const newFromTodayUsed = fromTodayUsed + amount;
 
@@ -29,7 +29,7 @@ export function createAmountManager({
           fromTodayRemaining: maxAmount - fromTodayUsed,
         };
       }
-      console.log(fromTodayUsed, newFromTodayUsed);
+
       await store.setTotal(to, newToAmount);
       await store.setTodayUsed(from, newFromTodayUsed);
 
