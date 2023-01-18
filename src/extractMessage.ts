@@ -1,3 +1,20 @@
+export function extract(message: string, niddle: string) {
+  const count = getNiddleCount(message, niddle);
+  if (count == 0) {
+    return null;
+  }
+
+  const mentions = getMentions(message);
+  if (mentions.length === 0) {
+    return null;
+  }
+
+  return {
+    count,
+    mentions,
+  };
+}
+
 export function getNiddleCount(message: string, niddle: string) {
   let result = 0;
 
