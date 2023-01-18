@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getNiddleCount, getMentions } from "./extractMessage";
+import { getNiddleCount, getMentions } from "./extractTarget";
 
 describe("extractMessage", () => {
   it("should getCount", async () => {

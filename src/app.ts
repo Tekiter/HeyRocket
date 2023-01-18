@@ -2,37 +2,38 @@ import endOfDay from "date-fns/endOfDay";
 import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { Hono } from "hono";
 import { createAmountManager } from "./amountManager";
-import { extract } from "./extractMessage";
+import { extractTarget } from "./extractTarget";
 import { createSlackEventHandler } from "./slack/event";
 import { createSlackWebClient } from "./slack/webapi";
 import { createD1Store } from "./store/d1/d1Store";
+import {
+  canNotSendMoreMessage,
+  receivedMessage,
+  sentSuccessMessage,
+} from "./messages";
+import { uniq } from "./util";
+import { AmountStore } from "./store/types";
 
 interface AppDeps {
   botToken: string;
-  d1db: D1Database;
+  store: AmountStore;
+  emoji: string;
+  todayQuota: number;
 }
 
-const TODAY_QUOTA = 5;
-const EMOJI = ":rocket:";
-
-export function createApp({ botToken, d1db }: AppDeps) {
+export function createApp({ botToken, store, emoji, todayQuota }: AppDeps) {
   const app = new Hono();
+
+  const handler = createSlackEventHandler();
+  const client = createSlackWebClient({ botToken });
+
+  const amountManager = createAmountManager({
+    store,
+    maxAmount: todayQuota,
+  });
 
   app.post("/event", async (c) => {
     const data = await c.req.json();
-
-    const getEndOfToday = () => {
-      const zone = "Asia/Seoul";
-      return zonedTimeToUtc(endOfDay(utcToZonedTime(new Date(), zone)), zone);
-    };
-
-    const handler = createSlackEventHandler();
-    const client = createSlackWebClient({ botToken });
-    const store = createD1Store(d1db, getEndOfToday);
-    const amountManager = createAmountManager({
-      store,
-      maxAmount: TODAY_QUOTA,
-    });
 
     handler.onEvent("message", async (payload) => {
       if (payload.subtype === undefined) {
@@ -42,23 +43,29 @@ export function createApp({ botToken, d1db }: AppDeps) {
           return;
         }
 
-        const extracted = extract(text, EMOJI);
-        if (!extracted) {
+        const { success, mentions, count } = extractTarget(text, emoji);
+        if (!success) {
           return;
         }
-        const { mentions, count } = extracted;
 
-        for (const target of mentions) {
+        const targets = uniq(mentions);
+
+        for (const target of targets) {
+          if (user === target) {
+            continue;
+          }
+
           const { success, fromTodayRemaining, toAmount } =
             await amountManager.give(user, target, count);
 
           if (!success) {
             await client.request("chat.postEphemeral", {
-              text: `${mentions
-                .map((user) => `<@${user}>`)
-                .join(
-                  ", "
-                )} 에게 ${EMOJI} ${count}개를 더 보낼 수 없어요! 오늘은 ${fromTodayRemaining}개만 더 보낼 수 있어요.`,
+              text: canNotSendMoreMessage(
+                mentions,
+                emoji,
+                count,
+                fromTodayRemaining
+              ),
               user,
               channel,
               thread_ts,
@@ -67,18 +74,14 @@ export function createApp({ botToken, d1db }: AppDeps) {
           }
 
           await client.request("chat.postEphemeral", {
-            text: `${mentions
-              .map((user) => `<@${user}>`)
-              .join(
-                ", "
-              )} 에게 ${EMOJI}을 ${count}개 보냈어요! 오늘 ${fromTodayRemaining}개를 더 보낼 수 있어요.`,
+            text: sentSuccessMessage(target, emoji, count, fromTodayRemaining),
             user,
             channel,
             thread_ts,
           });
 
           await client.request("chat.postMessage", {
-            text: `<@${user}> 에게서 ${EMOJI} ${count}개를 받았어요! 지금까지 받은 ${EMOJI}는 총 ${toAmount}개에요.`,
+            text: receivedMessage(user, emoji, count, toAmount),
             channel: target,
           });
         }

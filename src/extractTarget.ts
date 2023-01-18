@@ -1,15 +1,23 @@
-export function extract(message: string, niddle: string) {
+type ExtractedTarget =
+  | { success: true; count: number; mentions: string[] }
+  | { success: false; count?: undefined; mentions?: undefined };
+
+export function extractTarget(
+  message: string,
+  niddle: string
+): ExtractedTarget {
   const count = getNiddleCount(message, niddle);
   if (count == 0) {
-    return null;
+    return { success: false };
   }
 
   const mentions = getMentions(message);
   if (mentions.length === 0) {
-    return null;
+    return { success: false };
   }
 
   return {
+    success: true,
     count,
     mentions,
   };

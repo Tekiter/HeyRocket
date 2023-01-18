@@ -21,7 +21,7 @@ export function createAmountManager({
       const newToAmount = toAmount + amount;
       const newFromTodayUsed = fromTodayUsed + amount;
 
-      if (newFromTodayUsed > maxAmount) {
+      if (from === to || newFromTodayUsed > maxAmount) {
         return {
           success: false,
           fromAmount,
