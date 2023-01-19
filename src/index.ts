@@ -46,7 +46,9 @@ export default {
         "conversations_select",
         async (action, { user }) => {
           if (action.action_id === "add_bot_to_channel") {
-            await app.inviteBotToChannel(action.selected_conversation, user.id);
+            ctx.waitUntil(
+              app.inviteBotToChannel(action.selected_conversation, user.id)
+            );
           }
         }
       );
@@ -64,7 +66,7 @@ export default {
         const { user, tab } = payload;
 
         if (tab === "home") {
-          await app.updateHomeTab(user);
+          ctx.waitUntil(app.updateHomeTab(user));
         }
       });
 
