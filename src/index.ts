@@ -42,6 +42,15 @@ export default {
         }
       });
 
+      handler.onBlockAction(
+        "conversations_select",
+        async (action, { user }) => {
+          if (action.action_id === "add_bot_to_channel") {
+            await app.inviteBotToChannel(action.selected_conversation, user.id);
+          }
+        }
+      );
+
       await handler.handle(payload);
 
       return c.json(null, 200);

@@ -32,6 +32,20 @@ export class App {
     });
   }
 
+  async inviteBotToChannel(channelId: string, user: string) {
+    if (!channelId) {
+      return;
+    }
+
+    await this.client.request("conversations.join", {
+      channel: channelId,
+    });
+    await this.client.request("chat.postMessage", {
+      text: `<#{channelId}> 채널에서 이제 :rocket:을 사용할 수 있어요!`,
+      channel: user,
+    });
+  }
+
   async handleUserChat(
     user: string,
     text: string,
