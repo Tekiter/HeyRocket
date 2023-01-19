@@ -1,11 +1,11 @@
-import { createAmountManager } from "../amountManager";
+import { AmountManager } from "../amountManager";
 import { rankRecordMessage } from "./messages";
 import { dateToInt } from "../util";
 
 export async function createHomeView(
   userId: string,
   emoji: string,
-  amountManager: ReturnType<typeof createAmountManager>
+  amountManager: AmountManager
 ) {
   const [{ topReceived, topSent }, { sent, received }, remaining] =
     await Promise.all([

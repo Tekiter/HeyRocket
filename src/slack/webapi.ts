@@ -1,5 +1,7 @@
 import { WebAPITypes } from "./types";
 
+export type SlackWebClient = ReturnType<typeof createSlackWebClient>;
+
 interface SlackWebClientOptions {
   botToken: string;
 }

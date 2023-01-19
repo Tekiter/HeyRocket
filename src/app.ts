@@ -1,6 +1,6 @@
-import { createAmountManager } from "./amountManager";
+import { AmountManager } from "./amountManager";
 import { extractTarget } from "./extractTarget";
-import { createSlackWebClient } from "./slack/webapi";
+import { SlackWebClient } from "./slack/webapi";
 import {
   canNotSendMoreMessage,
   receivedMessage,
@@ -11,8 +11,8 @@ import { createHomeView } from "./view/home";
 
 export class App {
   constructor(
-    private amountManager: ReturnType<typeof createAmountManager>,
-    private client: ReturnType<typeof createSlackWebClient>,
+    private amountManager: AmountManager,
+    private client: SlackWebClient,
     private emoji: string
   ) {}
 

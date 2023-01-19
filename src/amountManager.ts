@@ -1,5 +1,7 @@
 import { AmountStore } from "./store/types";
 
+export type AmountManager = ReturnType<typeof createAmountManager>;
+
 interface AmountManagerOptions {
   store: AmountStore;
   maxAmount: number;
