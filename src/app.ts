@@ -6,7 +6,6 @@ import {
   receivedMessage,
   sentSuccessMessage,
 } from "./view/messages";
-import { uniq } from "./util";
 import { createHomeView } from "./view/home";
 
 export class App {
@@ -57,12 +56,9 @@ export class App {
       return;
     }
 
-    const targets = uniq(mentions);
-    for (const target of targets) {
-      if (user === target) {
-        continue;
-      }
+    const targets = mentions.filter((mention) => mention !== user);
 
+    for (const target of targets) {
       const { success, fromRemainingToday, toReceived } =
         await this.amountManager.give(user, target, count);
 
@@ -78,20 +74,26 @@ export class App {
           channel,
           thread_ts,
         });
-        continue;
+        return;
       }
 
-      await this.client.request("chat.postEphemeral", {
-        text: sentSuccessMessage(target, this.emoji, count, fromRemainingToday),
-        user,
-        channel,
-        thread_ts,
-      });
-
-      await this.client.request("chat.postMessage", {
-        text: receivedMessage(user, this.emoji, count, toReceived),
-        channel: target,
-      });
+      await Promise.all([
+        this.client.request("chat.postEphemeral", {
+          text: sentSuccessMessage(
+            target,
+            this.emoji,
+            count,
+            fromRemainingToday
+          ),
+          user,
+          channel,
+          thread_ts,
+        }),
+        this.client.request("chat.postMessage", {
+          text: receivedMessage(user, this.emoji, count, toReceived),
+          channel: target,
+        }),
+      ]);
     }
   }
 }

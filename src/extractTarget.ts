@@ -1,3 +1,5 @@
+import { uniq } from "./util";
+
 type ExtractedTarget =
   | { success: true; count: number; mentions: string[] }
   | { success: false; count?: undefined; mentions?: undefined };
@@ -49,9 +51,9 @@ export function getNiddleCount(message: string, niddle: string) {
 }
 
 export function getMentions(message: string) {
-  const regexp = /<@([A-Z0-9]+)>/g;
+  const regexp = /<@([A-Z0-9]+?)>/g;
 
   const matches = [...message.matchAll(regexp)];
 
-  return matches.map((match) => match[1]);
+  return uniq(matches.map((match) => match[1]));
 }

@@ -75,8 +75,7 @@ export default {
           if (!!bot_id || !text) {
             return;
           }
-
-          await app.handleUserChat(user, text, channel, thread_ts);
+          ctx.waitUntil(app.handleUserChat(user, text, channel, thread_ts));
         }
       });
 

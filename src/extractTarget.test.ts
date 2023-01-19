@@ -18,5 +18,11 @@ describe("extractMessage", () => {
       "AA33",
     ]);
     expect(getMentions("hello,")).toEqual([]);
+    expect(getMentions("hello, <@ABC> <@DEF> <@GHI> :rocket:")).toEqual([
+      "ABC",
+      "DEF",
+      "GHI",
+    ]);
+    expect(getMentions("hello, <@ABC> <@ABC>")).toEqual(["ABC"]);
   });
 });
