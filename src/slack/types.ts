@@ -4,6 +4,10 @@ export type {
   KnownEventFromType,
   SlackEvent,
 } from "@slack/bolt/dist/types/events";
+export type {
+  BlockAction,
+  BlockElementAction,
+} from "@slack/bolt/dist/types/actions";
 
 import type { Methods } from "@slack/web-api/dist/methods";
 

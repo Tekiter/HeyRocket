@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { createAmountManager } from "./amountManager";
 import { App } from "./app";
+import { createSlackActionHandler } from "./slack/action";
 import { createSlackEventHandler } from "./slack/event";
 import { createSlackWebClient } from "./slack/webapi";
 import { createD1Store } from "./store/d1/d1Store";
@@ -29,6 +30,22 @@ export default {
     });
 
     const app = new App(amountManager, client, env.EMOJI);
+
+    server.post("/action", async (c) => {
+      const data = await c.req.parseBody<{ payload: string }>();
+      const handler = createSlackActionHandler();
+      const payload = JSON.parse(data.payload) as unknown;
+
+      handler.onBlockAction("button", async (action, { user }) => {
+        if (action.action_id === "refresh_home_tab") {
+          await app.updateHomeTab(user.id);
+        }
+      });
+
+      await handler.handle(payload);
+
+      return c.json(null, 200);
+    });
 
     server.post("/event", async (c) => {
       const data = await c.req.json();

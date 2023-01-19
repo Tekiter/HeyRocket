@@ -10,7 +10,12 @@ export function createAmountManager({
   maxAmount,
 }: AmountManagerOptions) {
   return {
-    async getTotalAmount(userId: string) {
+    maxAmount,
+    async getTodayRemaining(userId: string) {
+      const { sent } = await store.getToday(userId);
+      return maxAmount - sent;
+    },
+    async getTotal(userId: string) {
       return await store.getTotal(userId);
     },
     async give(from: string, to: string, amount: number) {
