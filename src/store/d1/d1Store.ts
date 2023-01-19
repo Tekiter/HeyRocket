@@ -11,39 +11,47 @@ export function createD1Store(
   });
 
   return {
-    async getTodayUsed(userId) {
+    async getToday(userId) {
       const user = await db
-        .selectFrom("sent_today")
+        .selectFrom("today")
         .where("user_id", "=", userId)
-        .select(["amount", "expire"])
+        .select(["expire", "received", "sent"])
         .executeTakeFirst();
 
       if (!user) {
-        return 0;
+        return {
+          sent: 0,
+          received: 0,
+        };
       }
       if (dateToInt(new Date()) > user.expire) {
-        await db
-          .deleteFrom("sent_today")
-          .where("user_id", "=", userId)
-          .execute();
-        return 0;
+        await db.deleteFrom("today").where("user_id", "=", userId).execute();
+        return {
+          sent: 0,
+          received: 0,
+        };
       }
 
-      return user.amount;
+      return {
+        sent: user.sent,
+        received: user.received,
+      };
     },
-    async setTodayUsed(userId, amount) {
+    async setToday(userId, amount) {
       const expire = dateToInt(getEndOfToday());
 
       await db
-        .insertInto("sent_today")
+        .insertInto("today")
         .values({
           user_id: userId,
-          amount,
+          received: amount.received ?? 0,
+          sent: amount.sent ?? 0,
           expire,
         })
         .onConflict((oc) =>
           oc.column("user_id").doUpdateSet({
-            amount,
+            received: amount.received,
+            sent: amount.sent,
             expire,
           })
         )
@@ -51,42 +59,52 @@ export function createD1Store(
     },
     async getTotal(userId) {
       const user = await db
-        .selectFrom("received_total")
+        .selectFrom("total")
         .where("user_id", "=", userId)
-        .select(["amount"])
+        .select(["received", "sent"])
         .executeTakeFirst();
 
       if (!user) {
-        return 0;
+        return {
+          received: 0,
+          sent: 0,
+        };
       }
 
-      return user.amount;
+      return {
+        received: user.received,
+        sent: user.sent,
+      };
     },
     async setTotal(userId, amount) {
       await db
-        .insertInto("received_total")
+        .insertInto("total")
         .values({
           user_id: userId,
-          amount,
+          sent: amount.sent ?? 0,
+          received: amount.received ?? 0,
         })
         .onConflict((oc) =>
           oc.column("user_id").doUpdateSet({
-            amount,
+            sent: amount.sent,
+            received: amount.received,
           })
         )
         .execute();
     },
-    async getReceivedRanking(limit) {
+    async getTotalRank(limit, type) {
       const records = await db
-        .selectFrom("received_total")
-        .orderBy("amount", "desc")
+        .selectFrom("total")
+        .where(type, "!=", 0)
+        .orderBy(type, "desc")
         .limit(limit)
-        .select(["user_id", "amount"])
+        .select(["user_id", "received", "sent"])
         .execute();
 
       return records.map((record) => ({
         user: record.user_id,
-        amount: record.amount,
+        sent: record.sent,
+        received: record.received,
       }));
     },
     async commit() {},
@@ -94,13 +112,15 @@ export function createD1Store(
 }
 
 interface Database {
-  received_total: {
+  total: {
     user_id: string;
-    amount: number;
+    sent: number;
+    received: number;
   };
-  sent_today: {
+  today: {
     user_id: string;
-    amount: number;
+    sent: number;
+    received: number;
     expire: number;
   };
 }

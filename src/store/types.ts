@@ -1,13 +1,19 @@
 export interface AmountStore {
-  getTotal(userId: string): Promise<number>;
-  setTotal(userId: string, amount: number): Promise<void>;
-  getTodayUsed(userId: string): Promise<number>;
-  setTodayUsed(userId: string, amount: number): Promise<void>;
-  getReceivedRanking(limit: number): Promise<RankRecord[]>;
+  getTotal(userId: string): Promise<Amount>;
+  setTotal(userId: string, amount: Partial<Amount>): Promise<void>;
+  getToday(userId: string): Promise<Amount>;
+  setToday(userId: string, amount: Partial<Amount>): Promise<void>;
+  getTotalRank(limit: number, type: "sent" | "received"): Promise<RankRecord[]>;
   commit(): Promise<void>;
+}
+
+interface Amount {
+  sent: number;
+  received: number;
 }
 
 interface RankRecord {
   user: string;
-  amount: number;
+  sent: number;
+  received: number;
 }

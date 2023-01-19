@@ -14,36 +14,45 @@ export function createAmountManager({
       return await store.getTotal(userId);
     },
     async give(from: string, to: string, amount: number) {
-      const fromAmount = await store.getTotal(from);
-      const toAmount = await store.getTotal(to);
-      const fromTodayUsed = await store.getTodayUsed(from);
+      const { sent: fromSent } = await store.getTotal(from);
+      const { received: toReceived } = await store.getTotal(to);
+      const { sent: fromSentToday } = await store.getToday(from);
 
-      const newToAmount = toAmount + amount;
-      const newFromTodayUsed = fromTodayUsed + amount;
+      const newToReceived = toReceived + amount;
+      const newFromSent = fromSent + amount;
+      const newFromSentToday = fromSentToday + amount;
 
-      if (from === to || newFromTodayUsed > maxAmount) {
+      if (from === to || newFromSentToday > maxAmount) {
         return {
           success: false,
-          fromAmount,
-          toAmount,
-          fromTodayRemaining: maxAmount - fromTodayUsed,
+          fromSent,
+          toReceived,
+          fromRemainingToday: maxAmount - fromSentToday,
         };
       }
 
-      await store.setTotal(to, newToAmount);
-      await store.setTodayUsed(from, newFromTodayUsed);
+      await store.setTotal(from, {
+        sent: newFromSent,
+      });
+      await store.setToday(from, {
+        sent: newFromSentToday,
+      });
+      await store.setTotal(to, {
+        received: newToReceived,
+      });
 
       return {
         success: true,
-        fromAmount,
-        toAmount: newToAmount,
-        fromTodayRemaining: maxAmount - newFromTodayUsed,
+        fromSent: newFromSent,
+        toReceived: newToReceived,
+        fromRemainingToday: maxAmount - newFromSentToday,
       };
     },
-    async getRanking() {
-      const topReceived = await store.getReceivedRanking(10);
+    async getTotalRanking() {
+      const topReceived = await store.getTotalRank(10, "received");
+      const topSent = await store.getTotalRank(10, "sent");
 
-      return { topReceived };
+      return { topReceived, topSent };
     },
   };
 }
