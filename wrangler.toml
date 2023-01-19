@@ -4,7 +4,7 @@ compatibility_date = "2023-01-16"
 
 [vars]
 EMOJI = ":rocket:"
-TODAY_QUOTA = 5
+TODAY_QUOTA = "5"
 
 [[ d1_databases ]]
 binding = "DB"
