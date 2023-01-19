@@ -29,6 +29,7 @@ export class App {
       view: {
         type: "home",
         blocks: [
+          blockPlaceholder,
           {
             type: "section",
             text: {
@@ -43,6 +44,7 @@ export class App {
               text: `감사한 마음을 전하려면 메시지에 멘션과 함께 \`${this.emoji}\`을 포함시켜 메시지를 보내세요. ${this.emoji}는 하루에 ${this.amountManager.maxAmount}개까지 보낼 수 있어요.\n`,
             },
           },
+          blockPlaceholder,
           {
             type: "divider",
           },
@@ -74,6 +76,7 @@ export class App {
               },
             ],
           },
+          blockPlaceholder,
           {
             type: "divider",
           },
@@ -81,7 +84,14 @@ export class App {
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `지금까지 <@${userId}>는 ${this.emoji}를 ${sent}개 보내고, ${received}개 받았어요.`,
+              text: `*<@${userId}>의 정보*`,
+            },
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `지금까지 ${this.emoji}를 ${sent}개 보내고, ${received}개 받았어요.`,
             },
           },
           {
@@ -93,6 +103,7 @@ export class App {
               },
             ],
           },
+          blockPlaceholder,
           {
             type: "divider",
           },
@@ -168,3 +179,15 @@ export class App {
     }
   }
 }
+
+const blockPlaceholder = {
+  type: "context",
+  elements: [
+    {
+      type: "image",
+      image_url:
+        "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
+      alt_text: "placeholder",
+    },
+  ],
+};
