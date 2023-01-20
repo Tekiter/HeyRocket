@@ -1,7 +1,7 @@
 import { AmountManager } from "../amountManager";
-import { rankRecordMessage } from "./messages";
 import { dateToInt } from "../util";
 import type { KnownBlock } from "../slack/types";
+import { createRankingMessage } from "./ranking";
 
 export async function createHomeView(
   userId: string,
@@ -36,19 +36,23 @@ export async function createHomeView(
       fields: [
         {
           type: "mrkdwn",
-          text: `*받은 개수*\n${topReceived
-            .map(({ user, received }, idx) =>
-              rankRecordMessage(idx + 1, user, received, emoji)
-            )
-            .join("\n")}\n`,
+          text: `*받은 개수*\n${createRankingMessage(
+            topReceived.map((item) => ({
+              user: item.user,
+              amount: item.received,
+            })),
+            emoji
+          )}\n`,
         },
         {
           type: "mrkdwn",
-          text: `*보낸 개수*\n${topSent
-            .map(({ user, sent }, idx) =>
-              rankRecordMessage(idx + 1, user, sent, emoji)
-            )
-            .join("\n")}\n`,
+          text: `*보낸 개수*\n${createRankingMessage(
+            topSent.map((item) => ({
+              user: item.user,
+              amount: item.sent,
+            })),
+            emoji
+          )}\n`,
         },
       ],
     },

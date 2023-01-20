@@ -38,12 +38,3 @@ export function receivedMessage(
 ) {
   return `<@${user}> 에게서 ${emoji} ${count}개를 받았어요! 지금까지 받은 ${emoji}는 총 ${received}개에요.`;
 }
-
-export function rankRecordMessage(
-  rank: number,
-  user: string,
-  value: number,
-  emoji: string
-) {
-  return `*${rank}위:*  ${emoji} x ${value}\t<@${user}>`;
-}
