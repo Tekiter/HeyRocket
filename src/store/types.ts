@@ -1,6 +1,8 @@
 export interface AmountStore {
   getTotal(userId: string): Promise<Amount>;
   setTotal(userId: string, amount: Partial<Amount>): Promise<void>;
+  incTotal(userId: string, delta: Partial<Amount>): Promise<Amount>;
+
   getToday(userId: string): Promise<Amount>;
   setToday(userId: string, amount: Partial<Amount>): Promise<void>;
   getTotalRank(limit: number, type: "sent" | "received"): Promise<RankRecord[]>;

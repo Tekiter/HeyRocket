@@ -1,5 +1,5 @@
 import { AmountStore } from "../types";
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import { D1Dialect } from "kysely-d1";
 
 export function createD1Store(
@@ -91,6 +91,28 @@ export function createD1Store(
           })
         )
         .execute();
+    },
+    async incTotal(userId, delta) {
+      const { received, sent } = await db
+        .insertInto("total")
+        .values({
+          user_id: userId,
+          sent: delta.sent ?? 0,
+          received: delta.received ?? 0,
+        })
+        .onConflict((oc) =>
+          oc.column("user_id").doUpdateSet({
+            received: sql`received + ${delta.received ?? 0}`,
+            sent: sql`sent + ${delta.sent ?? 0}`,
+          })
+        )
+        .returning(["received", "sent"])
+        .executeTakeFirstOrThrow();
+
+      return {
+        received,
+        sent,
+      };
     },
     async getTotalRank(limit, type) {
       const records = await db
