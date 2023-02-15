@@ -11,52 +11,6 @@ export function createD1Store(
   });
 
   return {
-    async getToday(userId) {
-      const user = await db
-        .selectFrom("today")
-        .where("user_id", "=", userId)
-        .select(["expire", "received", "sent"])
-        .executeTakeFirst();
-
-      if (!user) {
-        return {
-          sent: 0,
-          received: 0,
-        };
-      }
-      if (dateToInt(new Date()) > user.expire) {
-        await db.deleteFrom("today").where("user_id", "=", userId).execute();
-        return {
-          sent: 0,
-          received: 0,
-        };
-      }
-
-      return {
-        sent: user.sent,
-        received: user.received,
-      };
-    },
-    async setToday(userId, amount) {
-      const expire = dateToInt(getEndOfToday());
-
-      await db
-        .insertInto("today")
-        .values({
-          user_id: userId,
-          received: amount.received ?? 0,
-          sent: amount.sent ?? 0,
-          expire,
-        })
-        .onConflict((oc) =>
-          oc.column("user_id").doUpdateSet({
-            received: amount.received,
-            sent: amount.sent,
-            expire,
-          })
-        )
-        .execute();
-    },
     async getTotal(userId) {
       const user = await db
         .selectFrom("total")
@@ -112,6 +66,95 @@ export function createD1Store(
       return {
         received,
         sent,
+      };
+    },
+
+    async getToday(userId) {
+      const user = await db
+        .selectFrom("today")
+        .where("user_id", "=", userId)
+        .select(["expire", "received", "sent"])
+        .executeTakeFirst();
+
+      if (!user) {
+        return {
+          sent: 0,
+          received: 0,
+        };
+      }
+      if (dateToInt(new Date()) > user.expire) {
+        await db.deleteFrom("today").where("user_id", "=", userId).execute();
+        return {
+          sent: 0,
+          received: 0,
+        };
+      }
+
+      return {
+        sent: user.sent,
+        received: user.received,
+      };
+    },
+    async setToday(userId, amount) {
+      const expire = dateToInt(getEndOfToday());
+
+      await db
+        .insertInto("today")
+        .values({
+          user_id: userId,
+          received: amount.received ?? 0,
+          sent: amount.sent ?? 0,
+          expire,
+        })
+        .onConflict((oc) =>
+          oc.column("user_id").doUpdateSet({
+            received: amount.received,
+            sent: amount.sent,
+            expire,
+          })
+        )
+        .execute();
+    },
+    async incToday(userId, delta, maxAmount) {
+      const expire = dateToInt(getEndOfToday());
+
+      const result = await db
+        .insertInto("today")
+        .values({
+          user_id: userId,
+          received: 0,
+          sent: 0,
+          expire,
+        })
+        .onConflict((oc) => {
+          let q = oc.doUpdateSet({
+            received: sql`received + ${delta.received ?? 0}`,
+            sent: sql`sent + ${delta.sent ?? 0}`,
+          });
+
+          if (maxAmount?.received !== undefined) {
+            q = q.where(
+              sql`received + ${delta.received ?? 0}`,
+              "<=",
+              maxAmount.received
+            );
+          }
+          if (maxAmount?.sent !== undefined) {
+            q = q.where(sql`sent + ${delta.sent ?? 0}`, "<=", maxAmount.sent);
+          }
+
+          return q;
+        })
+        .returning(["received", "sent"])
+        .executeTakeFirst();
+
+      if (!result) {
+        return null;
+      }
+
+      return {
+        received: result.received,
+        sent: result.sent,
       };
     },
     async getTotalRank(limit, type) {

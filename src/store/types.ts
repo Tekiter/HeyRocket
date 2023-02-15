@@ -5,6 +5,12 @@ export interface AmountStore {
 
   getToday(userId: string): Promise<Amount>;
   setToday(userId: string, amount: Partial<Amount>): Promise<void>;
+  incToday(
+    userId: string,
+    delta: Partial<Amount>,
+    max?: Partial<Amount>
+  ): Promise<Amount | null>;
+
   getTotalRank(limit: number, type: "sent" | "received"): Promise<RankRecord[]>;
   commit(): Promise<void>;
 }

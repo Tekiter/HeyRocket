@@ -21,13 +21,22 @@ export function createAmountManager({
       return await store.getTotal(userId);
     },
     async give(from: string, to: string, amount: number) {
-      const { sent: fromSentToday } = await store.getToday(from);
+      const newFromToday = await store.incToday(
+        from,
+        { sent: +amount },
+        { sent: maxAmount }
+      );
 
-      const newFromSentToday = fromSentToday + amount;
-
-      if (from === to || newFromSentToday > maxAmount) {
-        const { sent: fromSent } = await store.getTotal(from);
-        const { received: toReceived } = await store.getTotal(to);
+      if (!newFromToday) {
+        const [
+          { sent: fromSent },
+          { received: toReceived },
+          { sent: fromSentToday },
+        ] = await Promise.all([
+          store.getTotal(from),
+          store.getTotal(to),
+          store.getToday(from),
+        ]);
 
         return {
           success: false,
@@ -36,10 +45,6 @@ export function createAmountManager({
           fromRemainingToday: maxAmount - fromSentToday,
         };
       }
-
-      await store.setToday(from, {
-        sent: newFromSentToday,
-      });
 
       const [{ sent: newFromSent }, { received: newToReceived }] =
         await Promise.all([
@@ -55,7 +60,7 @@ export function createAmountManager({
         success: true,
         fromSent: newFromSent,
         toReceived: newToReceived,
-        fromRemainingToday: maxAmount - newFromSentToday,
+        fromRemainingToday: maxAmount - newFromToday.sent,
       };
     },
     async getTotalRanking() {
