@@ -1,11 +1,9 @@
-DROP TABLE IF EXISTS `total`;
 CREATE TABLE `total` (
     `user_id` TEXT NOT NULL,
     `sent` INTEGER NOT NULL,
     `received` INTEGER NOT NULL,
     PRIMARY KEY (`user_id`)
 );
-DROP TABLE IF EXISTS `today`;
 CREATE TABLE `today` (
     `user_id` TEXT NOT NULL,
     `sent` INTEGER NOT NULL,
@@ -13,3 +11,15 @@ CREATE TABLE `today` (
     `expire` INTEGER NOT NULL,
     PRIMARY KEY (`user_id`)
 );
+CREATE TABLE `backlog` (
+    `user_id` TEXT NOT NULL,
+    `sent` INTEGER NOT NULL,
+    `received` INTEGER NOT NULL,
+    `season_id` INTEGER NOT NULL,
+    PRIMARY KEY (`user_id`, `season_id`)
+);
+CREATE INDEX backlog_season ON `backlog` (`season_id`);
+CREATE TABLE `seasons` (
+    `season_id` INTEGER PRIMARY KEY AUTOINCREMENT,
+    `name` TEXT NOT NULL
+)

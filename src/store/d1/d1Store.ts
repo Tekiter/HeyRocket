@@ -1,5 +1,5 @@
 import { AmountStore } from "../types";
-import { Kysely, sql } from "kysely";
+import { Generated, Kysely, sql } from "kysely";
 import { D1Dialect } from "kysely-d1";
 
 export function createD1Store(
@@ -172,6 +172,42 @@ export function createD1Store(
         received: record.received,
       }));
     },
+    async getSeasonList() {
+      const list = await db
+        .selectFrom("seasons")
+        .select(["name", "season_id"])
+        .execute();
+
+      return list.map((row) => ({
+        id: row.season_id,
+        name: row.name,
+      }));
+    },
+    async getSeasonRank(seasonId, limit, type) {
+      return [];
+    },
+    async finishSeason(name) {
+      const { season_id: seasonId } = await db
+        .insertInto("seasons")
+        .values({ name })
+        .returning(["season_id", "name"])
+        .executeTakeFirstOrThrow();
+
+      await db
+        .insertInto("backlog")
+        .columns(["user_id", "sent", "received", "season_id"])
+        .expression((eb) =>
+          eb
+            .selectFrom("total")
+            .select([
+              "user_id",
+              "sent",
+              "received",
+              sql`${seasonId}`.as("season_id"),
+            ])
+        )
+        .execute();
+    },
     async commit() {},
   };
 }
@@ -187,6 +223,16 @@ interface Database {
     sent: number;
     received: number;
     expire: number;
+  };
+  backlog: {
+    user_id: string;
+    sent: number;
+    received: number;
+    season_id: number;
+  };
+  seasons: {
+    season_id: Generated<number>;
+    name: string;
   };
 }
 

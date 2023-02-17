@@ -12,6 +12,15 @@ export interface AmountStore {
   ): Promise<Amount | null>;
 
   getTotalRank(limit: number, type: "sent" | "received"): Promise<RankRecord[]>;
+
+  getSeasonList(): Promise<SeasonInfo[]>;
+  getSeasonRank(
+    seasonId: number,
+    limit: number,
+    type: "sent" | "received"
+  ): Promise<RankRecord[]>;
+  finishSeason(name: string): Promise<void>;
+
   commit(): Promise<void>;
 }
 
@@ -24,4 +33,9 @@ interface RankRecord {
   user: string;
   sent: number;
   received: number;
+}
+
+interface SeasonInfo {
+  id: number;
+  name: string;
 }
