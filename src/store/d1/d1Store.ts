@@ -122,8 +122,8 @@ export function createD1Store(
         .insertInto("today")
         .values({
           user_id: userId,
-          received: 0,
-          sent: 0,
+          received: delta.received ?? 0,
+          sent: delta.sent ?? 0,
           expire,
         })
         .onConflict((oc) => {
