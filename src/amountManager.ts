@@ -21,6 +21,7 @@ export function createAmountManager({
       return await store.getTotal(userId);
     },
     async give(from: string, to: string, amount: number) {
+      await store.getToday(from);
       const newFromToday = await store.incToday(
         from,
         { sent: +amount },
