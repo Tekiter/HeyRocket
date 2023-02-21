@@ -40,7 +40,7 @@ export class App {
       channel: channelId,
     });
     await this.client.request("chat.postMessage", {
-      text: `<#{channelId}> 채널에서 이제 :rocket:을 사용할 수 있어요!`,
+      text: `<#${channelId}> 채널에서 이제 :rocket:을 사용할 수 있어요!`,
       channel: user,
     });
   }
