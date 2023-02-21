@@ -28,7 +28,7 @@ export async function createHomeView(
       type: "header",
       text: {
         type: "plain_text",
-        text: "전체 기간 랭킹",
+        text: "현재 시즌 랭킹",
       },
     },
     {
@@ -106,7 +106,7 @@ function addHeyWorkerToChannel(emoji: string): KnownBlock[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `${emoji}을 보내려면 채널에 봇이 추가되어 있어야 해요! 오른쪽에서 채널을 선택하면 대신 추가해 드릴게요.`,
+        text: `${emoji}을 보내려면 채널에 봇이 추가되어 있어야 해요! 채널을 선택하면 대신 추가해 드릴게요.`,
       },
       accessory: {
         type: "conversations_select",
