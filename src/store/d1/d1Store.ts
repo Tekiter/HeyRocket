@@ -207,6 +207,9 @@ export function createD1Store(
             ])
         )
         .execute();
+
+      await db.deleteFrom("total").execute();
+      await db.deleteFrom("today").execute();
     },
     async commit() {},
   };

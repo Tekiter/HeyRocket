@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import { createAmountManager } from "./amountManager";
 import { App } from "./app";
 import { createSlackActionHandler } from "./slack/action";
@@ -12,6 +13,7 @@ export interface Env {
   DB: D1Database;
   EMOJI: string;
   TODAY_QUOTA: string;
+  ADMIN_SECRET_KEY: string;
 }
 
 export default {
@@ -85,6 +87,32 @@ export default {
       await store.commit();
 
       return c.json(response, 200);
+    });
+
+    server.post("/admin/finishSeason", async (c) => {
+      const adminKey = c.req.header("X-Admin-Key");
+      if (!adminKey || adminKey !== env.ADMIN_SECRET_KEY) {
+        return c.json("Unauthorized", 401);
+      }
+
+      const bodySchema = z.object({
+        seasonName: z.string(),
+      });
+
+      const data = await c.req.json();
+      const ret = bodySchema.safeParse(data);
+      if (!ret.success) {
+        return c.json({ error: ret.error.format() }, 400);
+      }
+
+      console.log("Resetting Season...", ret.data.seasonName);
+      await store.finishSeason(ret.data.seasonName);
+      return c.json({ success: true });
+    });
+
+    server.onError((err, c) => {
+      console.log(err.message, err.stack);
+      return c.json({ message: err.message }, 500);
     });
 
     return server.fetch(request, env, ctx);

@@ -11,3 +11,7 @@ binding = "DB"
 database_name = "hey-workers"
 database_id = "76fc4d4a-de91-4dbb-a294-9e3a0958ea32"
 
+
+# The necessary secrets are:
+# - ADMIN_SECRET_KEY
+# Run `echo <VALUE> | wrangler secret put <NAME>` for each of these
