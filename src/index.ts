@@ -2,11 +2,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { createAmountManager } from "./amountManager";
 import { App } from "./app";
-import { createSlackActionHandler } from "./slack/action";
-import { createSlackEventHandler } from "./slack/event";
-import { createSlackWebClient } from "./slack/webapi";
 import { createD1Store } from "./store/d1/d1Store";
 import { getEndOfToday } from "./util";
+import { ConversationsSelectAction, SlackApp } from "slack-cloudflare-workers";
 
 export interface Env {
   BOT_TOKEN: string;
@@ -14,6 +12,7 @@ export interface Env {
   EMOJI: string;
   TODAY_QUOTA: string;
   ADMIN_SECRET_KEY: string;
+  SLACK_SIGNING_SECRET: string;
 }
 
 export default {
@@ -24,70 +23,62 @@ export default {
   ): Promise<Response> {
     const server = new Hono();
 
+    const slackApp = new SlackApp({
+      env: {
+        SLACK_SIGNING_SECRET: env.SLACK_SIGNING_SECRET,
+        SLACK_BOT_TOKEN: env.BOT_TOKEN,
+      },
+    });
+
     const store = createD1Store(env.DB, getEndOfToday);
-    const client = createSlackWebClient({ botToken: env.BOT_TOKEN });
     const amountManager = createAmountManager({
       store,
       maxAmount: parseInt(env.TODAY_QUOTA, 10),
     });
 
-    const app = new App(amountManager, client, env.EMOJI);
+    const app = new App(amountManager, slackApp.client, env.EMOJI);
 
-    server.post("/action", async (c) => {
-      const data = await c.req.parseBody<{ payload: string }>();
-      const handler = createSlackActionHandler();
-      const payload = JSON.parse(data.payload) as unknown;
-
-      handler.onBlockAction("button", async (action, { user }) => {
-        if (action.action_id === "refresh_home_tab") {
-          await app.updateHomeTab(user.id);
-        }
-      });
-
-      handler.onBlockAction(
-        "conversations_select",
-        async (action, { user }) => {
-          if (action.action_id === "add_bot_to_channel") {
-            ctx.waitUntil(
-              app.inviteBotToChannel(action.selected_conversation, user.id)
-            );
+    slackApp
+      .action("refresh_home_tab", async ({ payload }) => {
+        await app.updateHomeTab(payload.user.id);
+      })
+      .action(
+        "add_bot_to_channel",
+        async () => {},
+        async ({ payload }) => {
+          const action = payload.actions.find(
+            (action): action is ConversationsSelectAction =>
+              action.type === "conversations_select"
+          );
+          if (!action) {
+            return;
           }
+
+          await app.inviteBotToChannel(
+            action.selected_conversation,
+            payload.user.id
+          );
         }
-      );
-
-      await handler.handle(payload);
-
-      return c.json(null, 200);
-    });
-
-    server.post("/event", async (c) => {
-      const data = await c.req.json();
-      const handler = createSlackEventHandler();
-
-      handler.onEvent("app_home_opened", async (payload) => {
+      )
+      .event("app_home_opened", async ({ payload }) => {
         const { user, tab } = payload;
 
         if (tab === "home") {
-          ctx.waitUntil(app.updateHomeTab(user));
+          await app.updateHomeTab(user);
+          await store.commit();
         }
-      });
-
-      handler.onEvent("message", async (payload) => {
+      })
+      .event("message", async ({ payload }) => {
         if (payload.subtype === undefined) {
           const { text, bot_id, channel, user, thread_ts } = payload;
 
           if (!!bot_id || !text) {
             return;
           }
-          ctx.waitUntil(app.handleUserChat(user, text, channel, thread_ts));
+          await app.handleUserChat(user, text, channel, thread_ts);
+          await store.commit();
         }
       });
-
-      const response = await handler.handle(data);
-      await store.commit();
-
-      return c.json(response, 200);
-    });
 
     server.post("/admin/finishSeason", async (c) => {
       const adminKey = c.req.header("X-Admin-Key");
@@ -113,6 +104,10 @@ export default {
     server.onError((err, c) => {
       console.log(err.message, err.stack);
       return c.json({ message: err.message }, 500);
+    });
+
+    server.all(async (c) => {
+      return await slackApp.run(c.req, ctx);
     });
 
     return server.fetch(request, env, ctx);

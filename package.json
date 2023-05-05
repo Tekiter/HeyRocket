@@ -3,8 +3,6 @@
   "version": "0.0.0",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
-    "@slack/bolt": "^3.12.2",
-    "better-sqlite3": "7.6.2",
     "typescript": "^4.9.4",
     "vitest": "^0.27.1",
     "wrangler": "2.7.1"
@@ -22,6 +20,7 @@
     "hono": "^2.7.2",
     "kysely": "^0.23.4",
     "kysely-d1": "^0.1.0",
+    "slack-cloudflare-workers": "^0.5.0",
     "zod": "^3.20.6"
   }
 }

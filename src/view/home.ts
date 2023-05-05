@@ -1,13 +1,16 @@
 import { AmountManager } from "../amountManager";
 import { dateToInt } from "../util";
-import type { KnownBlock } from "../slack/types";
 import { createRankingMessage } from "./ranking";
+import {
+  AnyHomeTabBlock,
+  AnySendableMessageBlock,
+} from "slack-cloudflare-workers";
 
 export async function createHomeView(
   userId: string,
   emoji: string,
   amountManager: AmountManager
-): Promise<KnownBlock[]> {
+): Promise<AnyHomeTabBlock[]> {
   const [{ topReceived, topSent }, { sent, received }, remaining] =
     await Promise.all([
       amountManager.getTotalRanking(),
@@ -69,7 +72,7 @@ export async function createHomeView(
   ];
 }
 
-const blockPlaceholder: KnownBlock = {
+const blockPlaceholder = {
   type: "context",
   elements: [
     {
@@ -79,9 +82,9 @@ const blockPlaceholder: KnownBlock = {
       alt_text: "placeholder",
     },
   ],
-};
+} satisfies AnySendableMessageBlock;
 
-function intro(emoji: string, maxAmount: number): KnownBlock[] {
+function intro(emoji: string, maxAmount: number) {
   return [
     {
       type: "section",
@@ -97,10 +100,10 @@ function intro(emoji: string, maxAmount: number): KnownBlock[] {
         text: `감사한 마음을 전하려면 메시지에 멘션과 함께 \`${emoji}\`을 포함시켜 메시지를 보내세요. ${emoji}는 하루에 ${maxAmount}개까지 보낼 수 있어요.\n`,
       },
     },
-  ];
+  ] satisfies AnySendableMessageBlock[];
 }
 
-function addHeyWorkerToChannel(emoji: string): KnownBlock[] {
+function addHeyWorkerToChannel(emoji: string) {
   return [
     {
       type: "section",
@@ -118,7 +121,7 @@ function addHeyWorkerToChannel(emoji: string): KnownBlock[] {
         action_id: "add_bot_to_channel",
       },
     },
-  ];
+  ] satisfies AnySendableMessageBlock[];
 }
 
 function personalRecord(
@@ -127,7 +130,7 @@ function personalRecord(
   sent: number,
   received: number,
   remaining: number
-): KnownBlock[] {
+) {
   return [
     {
       type: "section",
@@ -152,10 +155,10 @@ function personalRecord(
         },
       ],
     },
-  ];
+  ] satisfies AnySendableMessageBlock[];
 }
 
-function footer(): KnownBlock[] {
+function footer() {
   return [
     {
       type: "section",
@@ -175,5 +178,5 @@ function footer(): KnownBlock[] {
         action_id: "refresh_home_tab",
       },
     },
-  ];
+  ] satisfies AnySendableMessageBlock[];
 }
