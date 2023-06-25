@@ -117,13 +117,14 @@ export default {
       return c.json({ sent, received });
     });
 
+    server.all("/*", async (c) => {
+      console.log("Getting Slack Request");
+      return await slackApp.run(c.req.raw, ctx);
+    });
+
     server.onError((err, c) => {
       console.log(err.message, err.stack);
       return c.json({ message: err.message }, 500);
-    });
-
-    server.all(async (c) => {
-      return await slackApp.run(c.req.raw, ctx);
     });
 
     return server.fetch(request, env, ctx);
