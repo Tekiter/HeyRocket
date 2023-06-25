@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { createAmountManager } from "./amountManager";
 import { App } from "./app";
@@ -12,6 +13,7 @@ export interface Env {
   EMOJI: string;
   TODAY_QUOTA: string;
   ADMIN_SECRET_KEY: string;
+  INTERNAL_API_KEY: string;
   SLACK_SIGNING_SECRET: string;
 }
 
@@ -101,13 +103,27 @@ export default {
       return c.json({ success: true });
     });
 
+    server.get("/internal/data/total", async (c) => {
+      const internalKey = c.req.header("X-Internal-API-Key");
+      if (!internalKey || internalKey !== env.INTERNAL_API_KEY) {
+        return c.json("Unauthorized", 401);
+      }
+
+      const [sent, received] = await Promise.all([
+        store.getTotalRank(100, "sent"),
+        store.getTotalRank(100, "received"),
+      ]);
+
+      return c.json({ sent, received });
+    });
+
     server.onError((err, c) => {
       console.log(err.message, err.stack);
       return c.json({ message: err.message }, 500);
     });
 
     server.all(async (c) => {
-      return await slackApp.run(c.req, ctx);
+      return await slackApp.run(c.req.raw, ctx);
     });
 
     return server.fetch(request, env, ctx);
