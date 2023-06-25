@@ -109,12 +109,8 @@ export default {
         return c.json("Unauthorized", 401);
       }
 
-      const [sent, received] = await Promise.all([
-        store.getTotalRank(100, "sent"),
-        store.getTotalRank(100, "received"),
-      ]);
-
-      return c.json({ sent, received });
+      const data = await store.getTotalRank(100, "received");
+      return c.json(data);
     });
 
     server.all("/*", async (c) => {
