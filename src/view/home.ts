@@ -19,14 +19,12 @@ export async function createHomeView(
     ]);
 
   return [
-    blockPlaceholder,
+    margin,
     ...intro(emoji, amountManager.maxAmount),
-    blockPlaceholder,
+    margin,
     ...addHeyWorkerToChannel(emoji),
-    blockPlaceholder,
-    {
-      type: "divider",
-    },
+    margin,
+    divider,
     {
       type: "header",
       text: {
@@ -59,20 +57,16 @@ export async function createHomeView(
         },
       ],
     },
-    blockPlaceholder,
-    {
-      type: "divider",
-    },
+    margin,
+    divider,
     ...personalRecord(userId, emoji, sent, received, remaining),
-    blockPlaceholder,
-    {
-      type: "divider",
-    },
+    margin,
+    divider,
     ...footer(),
   ];
 }
 
-const blockPlaceholder = {
+const margin = {
   type: "context",
   elements: [
     {
@@ -82,6 +76,10 @@ const blockPlaceholder = {
       alt_text: "placeholder",
     },
   ],
+} satisfies AnySendableMessageBlock;
+
+const divider = {
+  type: "divider",
 } satisfies AnySendableMessageBlock;
 
 function intro(emoji: string, maxAmount: number) {
