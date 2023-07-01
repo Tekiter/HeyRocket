@@ -12,6 +12,7 @@ export interface AmountStore {
   ): Promise<Amount | null>;
 
   getTotalRank(limit: number, type: "sent" | "received"): Promise<RankRecord[]>;
+  getTodayRank(limit: number, type: "sent" | "received"): Promise<RankRecord[]>;
 
   getSeasonList(): Promise<SeasonInfo[]>;
   getSeasonRank(

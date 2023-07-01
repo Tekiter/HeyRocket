@@ -55,6 +55,9 @@ export function createAmountManager({
           store.incTotal(to, {
             received: +amount,
           }),
+          store.incToday(to, {
+            received: +amount,
+          }),
         ]);
 
       return {
@@ -67,6 +70,12 @@ export function createAmountManager({
     async getTotalRanking() {
       const topReceived = await store.getTotalRank(10, "received");
       const topSent = await store.getTotalRank(10, "sent");
+
+      return { topReceived, topSent };
+    },
+    async getTodayRanking() {
+      const topReceived = await store.getTodayRank(10, "received");
+      const topSent = await store.getTodayRank(10, "sent");
 
       return { topReceived, topSent };
     },

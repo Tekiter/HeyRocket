@@ -11,12 +11,17 @@ export async function createHomeView(
   emoji: string,
   amountManager: AmountManager
 ): Promise<AnyHomeTabBlock[]> {
-  const [{ topReceived, topSent }, { sent, received }, remaining] =
-    await Promise.all([
-      amountManager.getTotalRanking(),
-      amountManager.getTotal(userId),
-      amountManager.getTodayRemaining(userId),
-    ]);
+  const [
+    { topReceived, topSent },
+    { topReceived: topReceivedToday, topSent: topSentToday },
+    { sent, received },
+    remaining,
+  ] = await Promise.all([
+    amountManager.getTotalRanking(),
+    amountManager.getTodayRanking(),
+    amountManager.getTotal(userId),
+    amountManager.getTodayRemaining(userId),
+  ]);
 
   return [
     margin,
@@ -49,6 +54,40 @@ export async function createHomeView(
           type: "mrkdwn",
           text: `*보낸 개수*\n${createRankingMessage(
             topSent.map((item) => ({
+              user: item.user,
+              amount: item.sent,
+            })),
+            emoji
+          )}\n`,
+        },
+      ],
+    },
+    margin,
+    divider,
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: "오늘의 랭킹",
+      },
+    },
+    {
+      type: "section",
+      fields: [
+        {
+          type: "mrkdwn",
+          text: `*받은 개수*\n${createRankingMessage(
+            topReceivedToday.map((item) => ({
+              user: item.user,
+              amount: item.received,
+            })),
+            emoji
+          )}\n`,
+        },
+        {
+          type: "mrkdwn",
+          text: `*보낸 개수*\n${createRankingMessage(
+            topSentToday.map((item) => ({
               user: item.user,
               amount: item.sent,
             })),

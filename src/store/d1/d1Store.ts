@@ -172,6 +172,24 @@ export function createD1Store(
         received: record.received,
       }));
     },
+    async getTodayRank(limit, type) {
+      const records = await db
+        .selectFrom("today")
+        .where(type, "!=", 0)
+        .where("expire", ">=", dateToInt(new Date()))
+        .orderBy(type, "desc")
+        .limit(limit)
+        .select(["user_id", "received", "sent"])
+        .execute();
+
+      console.log(records);
+
+      return records.map((record) => ({
+        user: record.user_id,
+        sent: record.sent,
+        received: record.received,
+      }));
+    },
     async getSeasonList() {
       const list = await db
         .selectFrom("seasons")
