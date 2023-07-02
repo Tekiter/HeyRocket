@@ -116,7 +116,7 @@ export function createD1Store(
         .execute();
     },
     async incToday(userId, delta, maxAmount) {
-      const expire = dateToInt(getEndOfToday());
+      const newExpire = dateToInt(getEndOfToday());
 
       const result = await db
         .insertInto("today")
@@ -124,7 +124,7 @@ export function createD1Store(
           user_id: userId,
           received: delta.received ?? 0,
           sent: delta.sent ?? 0,
-          expire,
+          expire: newExpire,
         })
         .onConflict((oc) => {
           let q = oc.doUpdateSet({
@@ -175,14 +175,12 @@ export function createD1Store(
     async getTodayRank(limit, type) {
       const records = await db
         .selectFrom("today")
-        .where(type, "!=", 0)
+        .where(type, ">", 0)
         .where("expire", ">=", dateToInt(new Date()))
         .orderBy(type, "desc")
         .limit(limit)
         .select(["user_id", "received", "sent"])
         .execute();
-
-      console.log(records);
 
       return records.map((record) => ({
         user: record.user_id,
