@@ -8,5 +8,5 @@ CREATE TABLE `backlog` (
     `sent` INTEGER NOT NULL,
     `received` INTEGER NOT NULL,
     `season` INTEGER NOT NULL,
-    PRIMARY KEY (`user_id`)
+    PRIMARY KEY (`user_id`, `season_id`)
 );

@@ -116,6 +116,14 @@ export function createD1Store(
         .execute();
     },
     async incToday(userId, delta, maxAmount) {
+      if (
+        delta.sent != null &&
+        maxAmount?.sent != null &&
+        delta.sent > maxAmount.sent
+      ) {
+        return null;
+      }
+
       const newExpire = dateToInt(getEndOfToday());
 
       const result = await db
