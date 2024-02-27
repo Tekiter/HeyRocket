@@ -34,12 +34,14 @@ database_name = "hey-workers"
 database_id = "76fc4d4a-de91-4dbb-a294-9e3a0958ea32"
 ```
 
-3. 필요한 Secret 값을 설정합니다.
+3. 생성한 D1 데이터베이스에 `schema.sql` 의 내용을 활용해 테이블을 만듭니다.
+
+4. 필요한 Secret 값을 설정합니다.
 
 ```bash
-$ echo <어드민 API 접근용 랜덤키> | wrangler secret put ADMIN_SECRET_KEY
-$ echo <Slack API 봇에서 발급받은 Token> | wrangler secret put BOT_TOKEN
-$ echo <Slack API 봇에서 발급받은 SIGNING_SECRET> | wrangler secret put SLACK_SIGNING_SECRET
+$ echo <어드민 API 접근용 랜덤키> | yarn wrangler secret put ADMIN_SECRET_KEY
+$ echo <Slack API 봇에서 발급받은 Token> | yarn wrangler secret put BOT_TOKEN
+$ echo <Slack API 봇에서 발급받은 SIGNING_SECRET> | yarn wrangler secret put SLACK_SIGNING_SECRET
 ```
 
 Slack Signing Secret에 대한 정보는 다음 [링크](https://api.slack.com/authentication/verifying-requests-from-slack)를 참고하세요.
