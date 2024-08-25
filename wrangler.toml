@@ -2,6 +2,9 @@ name = "hey-rocket"
 main = "src/index.ts"
 compatibility_date = "2023-05-18"
 
+[placement]
+mode = "smart"
+
 [vars]
 EMOJI = ":rocket:"
 TODAY_QUOTA = "5"
