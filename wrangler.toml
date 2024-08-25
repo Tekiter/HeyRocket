@@ -1,4 +1,4 @@
-name = "hey-workers"
+name = "hey-rocket"
 main = "src/index.ts"
 compatibility_date = "2023-05-18"
 
@@ -8,8 +8,8 @@ TODAY_QUOTA = "5"
 
 [[ d1_databases ]]
 binding = "DB"
-database_name = "hey-workers"
-database_id = "76fc4d4a-de91-4dbb-a294-9e3a0958ea32"
+database_name = "hey-rocket-db"
+database_id = "f70f96fb-a2db-4b1f-a6c6-90a2a7ba2126"
 
 
 # The necessary secrets are:
