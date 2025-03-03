@@ -1,7 +1,7 @@
 #:schema node_modules/wrangler/config-schema.json
 
 name = "hey-rocket"
-main = "src/index.ts"
+main = "worker/index.ts"
 compatibility_date = "2023-05-18"
 
 [placement]
