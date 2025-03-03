@@ -6,7 +6,9 @@
   "scripts": {
     "deploy": "wrangler publish",
     "log": "wrangler tail",
-    "start": "wrangler dev",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest"
   },
   "dependencies": {
