@@ -95,6 +95,10 @@ export default {
       })
     );
 
+    server.get("/health", (c) => {
+      return c.text("OK");
+    });
+
     server.onError((err, c) => {
       console.log(err.message, err.stack);
       return c.json({ message: err.message }, 500);

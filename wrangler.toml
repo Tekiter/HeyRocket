@@ -11,6 +11,10 @@ mode = "smart"
 EMOJI = ":rocket:"
 TODAY_QUOTA = "5"
 
+[assets]
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "hey-rocket-db"
