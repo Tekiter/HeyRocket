@@ -5,6 +5,7 @@ import { App } from "./app";
 import { createD1Store } from "./store/d1/d1Store";
 import { getEndOfToday } from "./util";
 import { ConversationsSelectAction, SlackApp } from "slack-cloudflare-workers";
+import { adminApiRoute } from "./api/admin";
 
 export interface Env {
   BOT_TOKEN: string;
@@ -81,41 +82,18 @@ export default {
         }
       });
 
-    server.post("/admin/finishSeason", async (c) => {
-      const adminKey = c.req.header("X-Admin-Key");
-      if (!adminKey || adminKey !== env.ADMIN_SECRET_KEY) {
-        return c.json("Unauthorized", 401);
-      }
-
-      const bodySchema = z.object({
-        seasonName: z.string(),
-      });
-
-      const data = await c.req.json();
-      const ret = bodySchema.safeParse(data);
-      if (!ret.success) {
-        return c.json({ error: ret.error.format() }, 400);
-      }
-
-      console.log("Resetting Season...", ret.data.seasonName);
-      await store.finishSeason(ret.data.seasonName);
-      return c.json({ success: true });
-    });
-
-    server.get("/internal/data/total", async (c) => {
-      const internalKey = c.req.header("X-Internal-API-Key");
-      if (!internalKey || internalKey !== env.INTERNAL_API_KEY) {
-        return c.json("Unauthorized", 401);
-      }
-
-      const data = await store.getTotalRank(100, "received");
-      return c.json(data);
-    });
-
     server.all("/slack/events", async (c) => {
       console.log("Getting Slack Request");
       return await slackApp.run(c.req.raw, ctx);
     });
+
+    server.route(
+      "/api",
+      adminApiRoute({
+        checkIsAdmin: (key) => key === env.ADMIN_SECRET_KEY,
+        store,
+      })
+    );
 
     server.onError((err, c) => {
       console.log(err.message, err.stack);
