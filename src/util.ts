@@ -1,5 +1,5 @@
 import endOfDay from "date-fns/endOfDay";
-import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 export function uniq<T>(arr: T[]): T[] {
   return [...new Set(arr)];
@@ -7,7 +7,7 @@ export function uniq<T>(arr: T[]): T[] {
 
 export function getEndOfToday() {
   const zone = "Asia/Seoul";
-  return zonedTimeToUtc(endOfDay(utcToZonedTime(new Date(), zone)), zone);
+  return fromZonedTime(endOfDay(toZonedTime(new Date(), zone)), zone);
 }
 
 export function dateToInt(date: Date) {

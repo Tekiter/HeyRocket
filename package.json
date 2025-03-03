@@ -1,27 +1,36 @@
 {
   "name": "hey-workers",
   "version": "0.0.0",
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230518.0",
-    "typescript": "^4.9.4",
-    "vitest": "^0.27.1",
-    "wrangler": "^3.72.2"
-  },
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "wrangler dev",
     "deploy": "wrangler publish",
     "log": "wrangler tail",
+    "start": "wrangler dev",
     "test": "vitest"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.1.3",
     "date-fns": "^2.29.3",
-    "date-fns-tz": "^1.3.7",
+    "date-fns-tz": "^3.2.0",
     "hono": "^3.2.6",
     "kysely": "^0.23.4",
     "kysely-d1": "^0.1.0",
     "slack-cloudflare-workers": "^0.5.0",
     "zod": "^3.20.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20230518.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7",
+    "wrangler": "^3.111.0"
+  },
+  "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
   }
 }
