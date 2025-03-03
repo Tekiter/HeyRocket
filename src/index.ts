@@ -112,7 +112,7 @@ export default {
       return c.json(data);
     });
 
-    server.all("/*", async (c) => {
+    server.all("/slack/events", async (c) => {
       console.log("Getting Slack Request");
       return await slackApp.run(c.req.raw, ctx);
     });
